@@ -1,0 +1,15 @@
+{
+  "short_name": "BNA Portal",
+  "name": "BNA Bank — Portail placements",
+  "icons": [
+    {
+      "src": "bna-logo.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#009A6A",
+  "background_color": "#F0FAF6"
+}
