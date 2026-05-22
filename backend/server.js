@@ -26,13 +26,15 @@ const messageRoute       = require("./routes/messageRoute");
 const notificationRoute  = require("./routes/notificationRoute");
 const forecastRoute      = require("./routes/forecastRoute");
 const app  = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 // ── Middlewares globaux ──────────────────────────────────────
 const CORS_ORIGINS = [
   "http://localhost:3000",
   "http://127.0.0.1:3000",
 ];
+//C’est une sécurité du navigateur qui contrôle qui peut appeler API
+
 app.use(cors({
   origin(origin, callback) {
     if (!origin || CORS_ORIGINS.includes(origin)) {

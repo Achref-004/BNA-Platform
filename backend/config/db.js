@@ -11,9 +11,10 @@
 const mssql = require("mssql");
 require("dotenv").config();
 
-const DB_NAME_AUTH = process.env.DB_NAME_AUTH || "BNA";
-const DB_NAME_DW   = process.env.DB_NAME_DW   || "DW_BNA_Placements";
+const DB_NAME_AUTH = process.env.DB_NAME_AUTH ;
+const DB_NAME_DW   = process.env.DB_NAME_DW   ;
 
+//construit l’objet de configuration 
 function buildConfig(database) {
   return {
     server:   process.env.DB_SERVER,
@@ -55,6 +56,7 @@ function createPool(database) {
     });
 }
 
+//Singelton:avoir une seul pool par base 
 function poolFor(database) {
   if (!pools[database]) pools[database] = createPool(database);
   return pools[database];

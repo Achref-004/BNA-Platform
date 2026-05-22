@@ -7,6 +7,7 @@ const Groq    = require("groq-sdk");
 const { getDwPool, resetPool } = require("../config/db");
 const { verifyToken } = require("../middleware/authMiddleware");
 const { ensurePasswordChanged } = require("../middleware/ensurePasswordChanged");
+const { resolveScope, applyScopeToSQL } = require("../services/chatScope");
 require("dotenv").config();
 
 const router = express.Router();
@@ -99,7 +100,7 @@ async function summarizeHistory(messages) {
 }
 
 // ── Étape 1 : Générer le SQL via Groq ──────────────────────
-async function generateSQL(question) {
+async function generateSQL(question, scope) {
   const currentMonth = new Date().getMonth() + 1;
   const currentYear  = new Date().getFullYear();
 
@@ -143,6 +144,8 @@ RÈGLES GÉNÉRALES (OBLIGATOIRES)
 - Pour le taux moyen pondéré : SUM(fp.V_MONTANT * fp.V_TAUX) / SUM(fp.V_MONTANT).
 - Mois actuel = ${currentMonth}, Année actuelle = ${currentYear}.
 - Si la question ne concerne pas les données BNA → répondre UNIQUEMENT : NON_SQL
+- TOUJOURS joindre DW.DIM_STRUCTURE avec l'alias \`s\` (obligatoire pour le périmètre utilisateur).
+${scope?.promptBlock || ""}
 GROUP BY et ORDER BY :
 - Si ORDER BY dm.ORDRE → obligatoirement GROUP BY dm.LIB_TRANCHE, dm.ORDRE
 - ❌ INTERDIT : ORDER BY dm.ORDRE sans dm.ORDRE dans le GROUP BY
@@ -276,8 +279,14 @@ async function executeQuery(sqlQuery) {
 }
 
 // ── Étape 3 : Formater la réponse via Groq ────────────────
-async function formatResponse(question, data, user) {
+async function formatResponse(question, data, user, scope) {
   const dataStr = JSON.stringify(data, null, 2);
+  const scopeNote =
+    scope?.type === "agence"
+      ? `L'utilisateur ne voit que l'agence : ${scope.libAgence}.`
+      : scope?.type === "dr"
+        ? `L'utilisateur ne voit que la direction régionale : ${scope.libDr}.`
+        : "";
   const completion = await groq.chat.completions.create({
     model:     "llama-3.3-70b-versatile",
     max_tokens: 250,
@@ -286,6 +295,7 @@ async function formatResponse(question, data, user) {
         role: "system",
         content: `Tu es un assistant bancaire de la BNA (Banque Nationale Agricole de Tunisie).
 Tu parles à ${user?.prenom || user?.name || "un utilisateur"}.
+${scopeNote}
 Réponds en français, de façon claire, professionnelle et concise.
 Les montants sont en dinars tunisiens (DT) sauf indication contraire.
 - ❌ INTERDIT de commencer par "Bonjour", "Voici", "Bien sûr"…
@@ -338,13 +348,25 @@ router.post("/", async (req, res) => {
 
   let sqlQuery = null;
   try {
+    let scope;
     try {
-      sqlQuery = await generateSQL(trimmedQ);
+      scope = await resolveScope(user);
+    } catch (err) {
+      console.error("❌ Erreur périmètre chatbot:", err.message);
+      return res.status(503).json({ response: "Impossible de déterminer votre périmètre de données. Réessayez plus tard." });
+    }
+
+    if (scope.type === "denied") {
+      return res.status(403).json({ response: scope.message });
+    }
+
+    try {
+      sqlQuery = await generateSQL(trimmedQ, scope);
     } catch (err) {
       console.error("❌ Erreur Groq (génération SQL):", err.message);
       return res.status(502).json({ response: "Le service d'IA est momentanément indisponible. Réessayez dans quelques instants." });
     }
-    console.log("✅ SQL généré:", sqlQuery);
+    console.log("✅ SQL généré (LLM):", sqlQuery);
 
     if (sqlQuery.trim().toUpperCase() === "NON_SQL") {
       return res.json({ response: "Je suis spécialisé dans les données BNA (placements, objectifs, activités). Posez-moi une question sur vos données bancaires." });
@@ -352,6 +374,14 @@ router.post("/", async (req, res) => {
 
     if (!isSafeSQL(sqlQuery)) {
       console.warn("⛔ SQL rejeté (non sûr):", sqlQuery);
+      return res.status(403).json({ response: "La requête générée n'est pas autorisée. Reformulez votre question." });
+    }
+
+    sqlQuery = applyScopeToSQL(sqlQuery, scope);
+    console.log(`✅ SQL avec périmètre (${scope.type}):`, sqlQuery);
+
+    if (!isSafeSQL(sqlQuery)) {
+      console.warn("⛔ SQL rejeté après filtre périmètre:", sqlQuery);
       return res.status(403).json({ response: "La requête générée n'est pas autorisée. Reformulez votre question." });
     }
 
@@ -378,12 +408,18 @@ router.post("/", async (req, res) => {
     const isEmpty = !data || data.length === 0
       || data.every(row => Object.values(row).every(val => val === null));
     if (isEmpty) {
-      return res.json({ response: "Aucune donnée trouvée pour cette période ou ces critères." });
+      const scopeHint =
+        scope.type === "agence"
+          ? ` Aucun résultat pour votre agence (${scope.libAgence || "périmètre agence"}).`
+          : scope.type === "dr"
+            ? ` Aucun résultat pour votre direction régionale (${scope.libDr || "périmètre DR"}).`
+            : "";
+      return res.json({ response: `Aucune donnée trouvée pour cette période ou ces critères.${scopeHint}` });
     }
 
     let response;
     try {
-      response = await formatResponse(trimmedQ, data, user);
+      response = await formatResponse(trimmedQ, data, user, scope);
     } catch (err) {
       console.error("❌ Erreur Groq (formatage):", err.message);
       return res.json({
