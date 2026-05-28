@@ -1,1 +1,2 @@
-# Package des modèles de prévision (Prophet, ARIMA, Régression linéaire).
+# SARIMA (sarima_model) · Random Forest & XGBoost (tree_model)
+

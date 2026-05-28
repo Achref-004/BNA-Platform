@@ -46,7 +46,10 @@ function readSummary() {
   const summaryPath = path.join(outputDir, "results_summary.json");
   if (!fs.existsSync(summaryPath)) return null;
   try {
-    return JSON.parse(fs.readFileSync(summaryPath, "utf8"));
+    const raw = fs.readFileSync(summaryPath, "utf8");
+    // Python peut écrire NaN (JSON invalide pour Node) — normaliser en null
+    const fixed = raw.replace(/\bNaN\b/g, "null").replace(/\b-Infinity\b/g, "null").replace(/\bInfinity\b/g, "null");
+    return JSON.parse(fixed);
   } catch {
     return null;
   }
@@ -88,21 +91,33 @@ function runPipeline(inputPath) {
     });
 
     let stderr = "";
+    let stdout = "";
     proc.stderr.on("data", (chunk) => { stderr += chunk.toString(); });
-    proc.stdout.on("data", (chunk) => console.log("[forecast]", chunk.toString().trim()));
+    proc.stdout.on("data", (chunk) => {
+      const text = chunk.toString();
+      stdout += text;
+      console.log("[forecast]", text.trim());
+    });
 
     proc.on("close", (code) => {
       trainingState.finishedAt = new Date().toISOString();
       const summary = readSummary();
+      const ok =
+        code === 0
+        && (summary?.status === "success" || summary?.best_model?.name);
 
-      if (code === 0 && summary?.status === "success") {
+      if (ok) {
         trainingState.status = "success";
-        trainingState.message = `Meilleur modèle : ${summary.best_model?.name || "—"}`;
+        trainingState.message = "Entraînement terminé.";
         return resolve(summary);
       }
 
       trainingState.status = "error";
-      trainingState.message = summary?.error || stderr || `Pipeline Python code ${code}`;
+      const stderrTail = stderr.trim().split("\n").slice(-5).join("\n");
+      trainingState.message =
+        summary?.error
+        || (code !== 0 && stderrTail)
+        || `Pipeline Python code ${code}`;
       return reject(new Error(trainingState.message));
     });
 

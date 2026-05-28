@@ -16,8 +16,14 @@ import {
 function fmtMetric(v) {
   if (v == null || v === "" || Number.isNaN(Number(v))) return "—";
   const n = Number(v);
-  if (Math.abs(n) >= 1e6) return n.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
-  return n.toLocaleString("fr-FR", { maximumFractionDigits: 4 });
+  if (Math.abs(n) >= 1e9) return `${(n / 1e9).toFixed(2)} Md`;
+  if (Math.abs(n) >= 1e6) return `${(n / 1e6).toFixed(1)} M`;
+  return n.toLocaleString("fr-FR", { maximumFractionDigits: 0 });
+}
+
+function fmtSmape(v) {
+  if (v == null || v === "" || Number.isNaN(Number(v))) return "—";
+  return `${Number(v).toFixed(2)} %`;
 }
 
 export default function Forecast() {
@@ -70,16 +76,22 @@ export default function Forecast() {
     setStatusMsg("Upload en cours…");
     try {
       await uploadForecastFile(file);
-      setStatusMsg("Entraînement Prophet, ARIMA, Régression linéaire…");
+      setStatusMsg("Entraînement en cours…");
       await trainForecast();
       setStatus("success");
       setStatusMsg("Entraînement terminé.");
-      await refreshResults();
+      try {
+        await refreshResults();
+      } catch (refreshErr) {
+        showToast(
+          `Entraînement OK, mais chargement des résultats : ${refreshErr.message}`,
+        );
+      }
       showToast("Pipeline terminé avec succès.");
     } catch (e) {
       setStatus("error");
-      setStatusMsg(e.message);
-      showToast(e.message);
+      setStatusMsg(e.message?.slice(0, 200) || "Échec de l'entraînement.");
+      showToast(e.message || "Échec de l'entraînement.");
     }
   };
 
@@ -105,9 +117,6 @@ export default function Forecast() {
             AI FORECASTING · BNA
           </div>
           <h1 style={styles.title}>Prévision financière</h1>
-          <p style={styles.subtitle}>
-            Prophet · ARIMA · Régression linéaire — comparaison automatique et visualisations intégrées.
-          </p>
         </div>
       </header>
 
@@ -131,10 +140,6 @@ export default function Forecast() {
       {activeTab === "pipeline" && (
         <section style={styles.card}>
           <h2 style={styles.cardTitle}>1. Importer les données historiques</h2>
-          <p style={styles.hint}>
-            Colonnes : <code>date</code> et <code>montant</code>. Exemple :{" "}
-            <code>ml-forecast/data/sample_placements.csv</code> (exemple fourni)
-          </p>
           <input
             type="file"
             accept=".csv,.xlsx,.xls"
@@ -174,26 +179,8 @@ export default function Forecast() {
           {best && (
             <div style={styles.bestBox}>
               <div style={styles.bestTitle}>Meilleur modèle : {best.name}</div>
-              <p style={{ margin: "8px 0 0", fontSize: 13 }}>
-                MAPE retenu {best.mape}%
-                {results?.best_model?.selection_method && (
-                  <> · via {results.best_model.selection_method}</>
-                )}
-                {best.mae != null && (
-                  <> · MAE {fmtMetric(best.mae)} · RMSE {fmtMetric(best.rmse)}</>
-                )}
-              </p>
-              <p style={{ margin: "12px 0 0", fontSize: 13, color: BNA.textMuted, lineHeight: 1.6 }}>
-                {results?.explanation}
-              </p>
             </div>
           )}
-
-          <p style={{ ...styles.hint, marginTop: 12 }}>
-            <b>Classement (Rang)</b> : pour chaque modèle, on prend le <b>plus petit MAPE</b> entre hold-out 80/20
-            et TimeSeriesSplit ; le modèle retenu pour la prévision (année suivante) est celui au{" "}
-            <b>MAPE minimal</b> global.
-          </p>
 
           {failedModels.length > 0 && (
             <div style={styles.failBox}>
@@ -213,16 +200,14 @@ export default function Forecast() {
                   <tr>
                     <th style={styles.th} rowSpan={2}>Rang</th>
                     <th style={styles.th} rowSpan={2}>Modèle</th>
-                    <th style={styles.thGroup} colSpan={3}>Hold-out 80/20</th>
-                    <th style={styles.thGroup} colSpan={3}>TimeSeriesSplit</th>
+                    <th style={styles.thGroup} colSpan={2}>Hold-out 80/20</th>
+                    <th style={styles.thGroup} colSpan={2}>TimeSeriesSplit</th>
                   </tr>
                   <tr>
-                    <th style={styles.thSub}>MAE</th>
                     <th style={styles.thSub}>RMSE</th>
-                    <th style={styles.thSub}>MAPE (%)</th>
-                    <th style={styles.thSub}>MAE</th>
+                    <th style={styles.thSub}>SMAPE</th>
                     <th style={styles.thSub}>RMSE</th>
-                    <th style={styles.thSub}>MAPE (%)</th>
+                    <th style={styles.thSub}>SMAPE</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -231,18 +216,16 @@ export default function Forecast() {
                       <td style={styles.tdLeft}>{row.rang}</td>
                       <td style={styles.tdLeft}>
                         <b>{row.modele}</b>
-                        {row.best_mape != null && (
+                        {row.best_rmse != null && (
                           <div style={{ fontSize: 10, color: BNA.textMuted, marginTop: 2 }}>
-                            MAPE min {fmtMetric(row.best_mape)}%
+                            RMSE min {fmtMetric(row.best_rmse)}
                           </div>
                         )}
                       </td>
-                      <td style={styles.td}>{fmtMetric(row.mae)}</td>
                       <td style={styles.td}>{fmtMetric(row.rmse)}</td>
-                      <td style={styles.td}>{fmtMetric(row.mape)}</td>
-                      <td style={styles.td}>{fmtMetric(row.mae_cv)}</td>
-                      <td style={styles.td}>{fmtMetric(row.rmse_cv)}</td>
-                      <td style={styles.td}>{fmtMetric(row.mape_cv)}</td>
+                      <td style={styles.td}>{fmtSmape(row.smape)}</td>
+                      <td style={styles.td}>{fmtMetric(row.rmse_cv ?? row.rmse_wf)}</td>
+                      <td style={styles.td}>{fmtSmape(row.smape_cv ?? row.smape_wf)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -279,10 +262,6 @@ export default function Forecast() {
       {activeTab === "charts" && (
         <section style={styles.card}>
           <h2 style={styles.cardTitle}>Visualisations</h2>
-          <p style={styles.hint}>
-            Comparaison des modèles (MAPE) et évolution des montants historiques avec la prévision
-            de l&apos;année suivante.
-          </p>
           <ForecastCharts
             chartData={chartData}
             comparisonRanked={comparison}
@@ -305,21 +284,21 @@ function resolveChartData(results, forecast) {
   if (results?.chart_data?.history?.length) return results.chart_data;
   if (forecast?.chart_data?.history?.length) return forecast.chart_data;
   const ranked = results?.comparison_ranked || [];
-  const modelMape = ranked.map((r) => ({
+  const modelMetrics = ranked.map((r) => ({
     modele: r.modele,
-    mape_holdout: r.mape,
-    mape_cv: r.mape_cv,
-    mape_best: r.best_mape,
+    rmse_holdout: r.rmse,
+    rmse_timeseries_split: r.rmse_cv ?? r.rmse_wf,
+    rmse_best: r.best_rmse,
   }));
   const preview = forecast?.preview || [];
-  if (!preview.length && !modelMape.length) return null;
+  if (!preview.length && !modelMetrics.length) return null;
   return {
     history: results?.chart_data?.history || [],
     forecast: preview.map((row) => ({
       date: row.ds,
       montant: row.montant_prevu,
     })),
-    model_mape: modelMape,
+    model_metrics: modelMetrics,
   };
 }
 
@@ -349,7 +328,6 @@ const styles = {
   },
   eyebrowDot: { width: 6, height: 6, borderRadius: "50%", background: BNA.greenMid },
   title: { margin: 0, fontSize: 28, fontWeight: 800, color: BNA.textDark },
-  subtitle: { margin: "6px 0 0", color: BNA.textMuted, fontSize: 14, maxWidth: 720 },
   tabs: { display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" },
   tabBtn: {
     padding: "10px 16px", borderRadius: 12, border: `1.5px solid ${BNA.border}`,

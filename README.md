@@ -40,7 +40,7 @@ L'utilisateur se connecte avec son email + mot de passe (stocké sous forme de h
 - **Centraliser** les tableaux de bord Power BI dans une interface unique.
 - **Sécuriser** l'accès via authentification + rôles (Admin / Agence / Direction régionale / Direction centrale).
 - **Permettre** une consultation du Data Warehouse en langage naturel grâce à un **chatbot IA** (Groq + SQL).
-- **Prévoir** les montants via un module ML (Prophet, ARIMA, régression) sur données mensuelles.
+- **Prévoir** les montants via un module ML (SARIMA, Random Forest, XGBoost) sur données mensuelles DW — **RMSE** (classement) + **SMAPE** (affichage).
 
 ---
 

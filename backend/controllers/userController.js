@@ -55,7 +55,7 @@ function validatePayload({ nom, prenom, email, role, statut, code_structure, mot
   if (!role   || !ASSIGNABLE_ROLES.includes(role))
     errors.push(`Rôle invalide. Valeurs autorisées : ${ASSIGNABLE_ROLES.join(", ")}.`);
   if (statut && !STATUTS.includes(statut)) errors.push(`Statut invalide (${STATUTS.join(", ")}).`);
-  if (code_structure && (typeof code_structure !== "string" || code_structure.length > 50)) {
+  if (code_structure && (typeof code_structure !== "string" || code_structure.length > 5)) {
     errors.push("Code structure invalide.");
   }
   if (requirePassword || (mot_de_passe !== undefined && mot_de_passe !== "")) {

@@ -8,11 +8,12 @@ mon-dashboard/
 │   ├── train_and_predict.py     # CLI (appelé par Node)
 │   ├── pipeline.py              # Orchestration
 │   ├── preprocessing.py         # Nettoyage + features
-│   ├── metrics.py               # MAE, RMSE, MAPE
+│   ├── metrics.py               # RMSE + SMAPE
 │   ├── models/
-│   │   ├── prophet_model.py
-│   │   ├── arima_model.py
-│   │   └── linear_model.py
+│   │   ├── sarima_model.py
+│   │   ├── tree_model.py        # Random Forest + XGBoost
+│   │   └── ml_features.py
+│   ├── outputs/                 # (gitignored — généré en dev)
 │   ├── data/sample_placements.csv
 │   └── requirements.txt
 ├── backend/
@@ -31,28 +32,27 @@ mon-dashboard/
 1. L'utilisateur upload un **CSV/Excel** (`date`, `montant`) via React.
 2. Node enregistre le fichier dans `backend/data/forecast/uploads/`.
 3. Node lance `python ml-forecast/train_and_predict.py`.
-4. Python : preprocessing → 3 modèles → comparaison → prévision 12 mois (année suivante) → exports.
+4. Python : preprocessing → 3 modèles (SARIMA, RF, XGB) → comparaison RMSE/SMAPE → prévision 12 mois → exports.
 5. React affiche le tableau comparatif, les graphiques et l’aperçu des prévisions.
 
 ## Modèles
 
 | Modèle | Idée | Forces |
 |--------|------|--------|
-| **Prophet** | Tendance + saisonnalité | Séries avec saisonnalité annuelle |
-| **ARIMA** | Autorégression + différenciation | Baseline classique, peu de paramètres |
-| **Régression linéaire** | Temps + mois + trimestre | Simple, rapide, interprétable |
+| **SARIMA** | Série temporelle saisonnière (auto_arima) | Standard banque / économétrie |
+| **Random Forest** | Arbres + variables DW + lags | Non-linéaire, robuste |
+| **XGBoost** | Boosting + variables DW + lags | Souvent le meilleur sur données tabulaires |
 
 ## Métriques
 
-- **MAE** : erreur absolue moyenne (même unité que le montant).
-- **RMSE** : pénalise les grosses erreurs.
-- **MAPE** : erreur en % — utilisée pour **classer** les modèles (plus bas = meilleur).
+- **RMSE** : erreur en TND — utilisée pour **classer** les modèles (plus bas = meilleur).
+- **SMAPE** : erreur relative en % (plus bas = mieux) — affichée en complément.
 
 Validation :
 - **Hold-out 80/20** temporel (pas de mélange aléatoire).
-- **TimeSeriesSplit** sur la partie train (moyenne des plis).
+- **TimeSeriesSplit** (sklearn) : 5 plis, fenêtre d’entraînement croissante.
 
-Le modèle retenu est celui avec le **plus petit MAPE** entre hold-out et TimeSeriesSplit.
+Le modèle retenu est celui avec le **plus petit RMSE** entre hold-out et TimeSeriesSplit.
 
 ## Installation
 
@@ -130,6 +130,6 @@ Alias acceptés : `ds`, `amount`, `y`, `valeur`, etc.
 
 ## Visualisations
 
-L’onglet **Visualisations** affiche les graphiques (comparaison MAPE, historique + prévision) à partir de `chart_data` dans `results_summary.json`.
+L’onglet **Visualisations** affiche les graphiques (comparaison RMSE, historique + prévision) à partir de `chart_data` dans `results_summary.json`.
 
 L’année prévue est calculée automatiquement : **dernière année des données + 1**.

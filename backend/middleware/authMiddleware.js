@@ -32,7 +32,7 @@ function verifyToken(req, res, next) {
 
   try {
     const payload = jwt.verify(token, JWT_SECRET);
-    req.auth = payload; // { sub, email, role, code_structure, iat, exp } Passer des information a authControllers
+    req.auth = payload; // { sub, email, role, code_structure, iat, exp } Passer des information a autheControllers
     return next();
   } catch (e) {
     if (e.name === "TokenExpiredError") {

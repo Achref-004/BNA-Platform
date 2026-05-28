@@ -3,7 +3,7 @@
 // ------------------------------------------------------------
 // Endpoints :
 //   POST /api/forecast/upload      → dépose CSV/Excel
-//   GET  /api/forecast/train       → lance Prophet + ARIMA + Linéaire
+//   GET  /api/forecast/train       → SARIMA, Random Forest, XGBoost
 //   GET  /api/forecast/results     → tableau comparatif + meilleur modèle
 //   GET  /api/forecast/predict → prévisions (12 mois année suivante)
 //   GET  /api/forecast/status      → état entraînement
@@ -93,7 +93,6 @@ function results(req, res) {
     comparison: summary.comparison || [],
     comparison_ranked: summary.comparison_ranked || summary.comparison || [],
     best_model: summary.best_model,
-    explanation: summary.explanation,
     preprocessing: summary.preprocessing,
     chart_data: summary.chart_data || null,
     generated_at: summary.generated_at,
@@ -117,7 +116,6 @@ function predict(req, res) {
 
   return res.json({
     best_model: summary?.best_model,
-    explanation: summary?.explanation,
     preview,
     chart_data: summary?.chart_data || null,
     forecast_target_year: summary?.forecast_target_year ?? null,

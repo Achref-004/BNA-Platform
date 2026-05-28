@@ -102,9 +102,8 @@ export default function WelcomeCard({ user, onLogout }) {
             tone="mint"
             icon={<ChartUpIcon />}
             title="Prévision"
-            text="Anticipation des placements (bientôt)."
+            text="Anticipation des placements."
             onClick={() => navigate("/prevision")}
-            soon
           />
         </section>
       </div>
@@ -115,7 +114,7 @@ export default function WelcomeCard({ user, onLogout }) {
 /* ─── Sous-composants visuels ─── */
 
 
-function ActionCard({ tone, icon, title, text, onClick, badge, soon }) {
+function ActionCard({ tone, icon, title, text, onClick, badge }) {
   return (
     <button
       onClick={onClick}
@@ -142,7 +141,6 @@ function ActionCard({ tone, icon, title, text, onClick, badge, soon }) {
         <div style={styles.actionTitleRow}>
           <span>{title}</span>
           {badge && <span style={styles.badge}>{badge}</span>}
-          {soon  && <span style={styles.soon}>SOON</span>}
         </div>
         <div style={styles.actionText}>{text}</div>
       </div>
@@ -400,12 +398,6 @@ const styles = {
     background: "#fff", color: BNA.greenDark,
     padding: "2px 9px", borderRadius: 12,
     fontSize: 10, fontWeight: 800, letterSpacing: 0.6,
-  },
-  soon: {
-    background: "rgba(255,255,255,0.25)", color: "#fff",
-    padding: "2px 9px", borderRadius: 12,
-    fontSize: 10, fontWeight: 800, letterSpacing: 0.6,
-    border: "1px solid rgba(255,255,255,0.35)",
   },
   actionText: {
     fontSize: 13, opacity: 0.92, marginTop: 5,

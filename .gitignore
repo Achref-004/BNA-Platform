@@ -17,6 +17,8 @@ frontend/build
 **/__pycache__/
 *.py[cod]
 ml-forecast/venv/
+ml-forecast/outputs/*
+!ml-forecast/outputs/.gitkeep
 
 # misc
 .DS_Store

@@ -119,9 +119,6 @@ export default function UserMessaging() {
             MESSAGERIE BNA
           </div>
           <h1 style={styles.title}>Messages à l’administration</h1>
-          <p style={styles.subtitle}>
-            Envoyé / lu / répondu — suivez vos échanges et l’historique des réponses.
-          </p>
         </div>
         <button type="button" style={styles.primaryBtn} onClick={openNewComposer}>
           + Nouvelle conversation
@@ -302,7 +299,6 @@ const styles = {
   },
   eyebrowDot: { width: 6, height: 6, borderRadius: "50%", background: BNA.greenMid },
   title: { margin: 0, fontSize: 28, fontWeight: 800, color: BNA.textDark },
-  subtitle: { margin: "6px 0 0", color: BNA.textMuted, maxWidth: 720, fontSize: 14 },
   primaryBtn: {
     background: GRADIENTS.brand,
     color: "#fff",
