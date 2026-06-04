@@ -32,6 +32,7 @@ export default function AdminMessages() {
   const [reply, setReply]     = useState("");
   const [sending, setSending] = useState(false);
   const [toast, setToast]   = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const showToast = (msg) => {
     setToast(msg);
@@ -92,13 +93,15 @@ export default function AdminMessages() {
   };
 
   const handleDelete = async () => {
-    if (!detail?.thread?.id || !window.confirm("Supprimer définitivement ce fil ?")) return;
+    if (!detail?.thread?.id) return;
     try {
       await adminDeleteThread(detail.thread.id);
+      setConfirmOpen(false);
       setDetail(null);
       setSelectedId(null);
       await loadList();
     } catch (e) {
+      setConfirmOpen(false);
       showToast(e.message);
     }
   };
@@ -208,7 +211,7 @@ export default function AdminMessages() {
                     <span style={{ color: BNA.greenDark }}>{participantLabel.email}</span>
                   </div>
                 </div>
-                <button type="button" onClick={handleDelete} style={styles.dangerGhost}>
+                <button type="button" onClick={() => setConfirmOpen(true)} style={styles.dangerGhost}>
                   Supprimer le fil
                 </button>
               </div>
@@ -261,7 +264,40 @@ export default function AdminMessages() {
         </section>
       </div>
 
+      {confirmOpen && detail?.thread && (
+        <ConfirmDeleteThread
+          thread={detail.thread}
+          participant={participantLabel}
+          onCancel={() => setConfirmOpen(false)}
+          onConfirm={handleDelete}
+        />
+      )}
+
       {toast && <div style={styles.toast}>{toast}</div>}
+    </div>
+  );
+}
+
+function ConfirmDeleteThread({ thread, participant, onCancel, onConfirm }) {
+  return (
+    <div style={styles.overlay} onClick={onCancel}>
+      <div style={{ ...styles.modal, maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
+        <div style={{ padding: 24, textAlign: "center" }}>
+          <div style={styles.warnCircle}>!</div>
+          <h2 style={{ margin: "10px 0 6px", color: BNA.textDark }}>Confirmer la suppression</h2>
+          <p style={{ color: BNA.textMuted, fontSize: 14, margin: "0 0 18px" }}>
+            Supprimer le fil <b>{thread.subject}</b>
+            {participant ? ` de ${participant.prenom} ${participant.nom}` : ""} ?<br />
+            Cette action est irréversible.
+          </p>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+            <button onClick={onCancel} style={styles.btnGhost}>Annuler</button>
+            <button onClick={onConfirm} style={{ ...styles.btnPrimary, background: BNA.danger }}>
+              Supprimer
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -448,5 +484,37 @@ const styles = {
     color: "#fff",
     fontWeight: 700,
     zIndex: 10001,
+  },
+  /** Modal de confirmation : aligné sur UserManagement.jsx (suppression utilisateur). */
+  overlay: {
+    position: "fixed", inset: 0, background: "rgba(13,40,30,0.45)",
+    backdropFilter: "blur(2px)",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    zIndex: 10000, padding: 16,
+  },
+  modal: {
+    background: BNA.white, borderRadius: 18,
+    width: "100%", maxWidth: 520,
+    boxShadow: "0 30px 80px rgba(0,0,0,0.3)",
+    overflow: "hidden",
+    animation: "bna-pop 0.22s ease-out",
+  },
+  warnCircle: {
+    width: 56, height: 56, borderRadius: "50%",
+    background: BNA.dangerSoft, color: BNA.danger,
+    fontSize: 28, fontWeight: 800,
+    display: "inline-flex", alignItems: "center", justifyContent: "center",
+    margin: "0 auto",
+  },
+  btnGhost: {
+    background: "transparent", border: `1.5px solid ${BNA.border}`,
+    borderRadius: 10, padding: "10px 18px", fontSize: 13, fontWeight: 600,
+    color: BNA.textDark, cursor: "pointer",
+  },
+  btnPrimary: {
+    background: `linear-gradient(135deg, ${BNA.green}, ${BNA.greenDark})`,
+    color: "#fff", border: "none", borderRadius: 10,
+    padding: "10px 22px", fontSize: 13, fontWeight: 700,
+    cursor: "pointer", boxShadow: "0 8px 20px rgba(0,154,106,0.28)",
   },
 };

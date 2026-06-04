@@ -4,7 +4,7 @@
 // Threads + posts (voir backend/controllers/messageController.js).
 // JWT joint automatiquement (Authorization Bearer).
 // ============================================================
-import { API_BASE } from "../styles/theme";
+import { API_BASE } from "../config";
 import { getToken } from "./authService";
 
 function authHeaders(extra = {}) {
@@ -42,13 +42,6 @@ export async function getMyThread(id) {
 }
 
 /** Admin */
-export async function adminUnreadThreads() {
-  const res = await fetch(`${API_BASE}/messages/admin/threads/unread-count`, {
-    headers: authHeaders(),
-  });
-  return handle(res);
-}
-
 export async function adminListThreads(params = {}) {
   const qs = new URLSearchParams({
     search:   params.search   || "",

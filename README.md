@@ -235,7 +235,7 @@ JWT_EXPIRES_IN=8h
 ```
 
 Côté **frontend**, l'URL de l'API et le lien Power BI sont configurés dans
-`frontend/src/styles/theme.js` (exports `API_BASE` et `POWERBI_EMBED_URL`).
+`frontend/src/config.js` (exports `API_BASE` et `POWERBI_EMBED_URL`).
 
 ---
 

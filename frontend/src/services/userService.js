@@ -5,7 +5,7 @@
 // Toutes les requêtes joignent automatiquement le JWT via
 // l'en-tête Authorization: Bearer <token>.
 // ============================================================
-import { API_BASE } from "../styles/theme";
+import { API_BASE } from "../config";
 import { getToken } from "./authService";
 
 /** Construit les headers d'auth (+ extras éventuels). */
@@ -37,12 +37,6 @@ async function handle(res) {
 export async function listUsers({ search = "", role = "", statut = "", page = 1, pageSize = 10 } = {}) {
   const qs = new URLSearchParams({ search, role, statut, page, pageSize });
   const res = await fetch(`${API_BASE}/users?${qs.toString()}`, { headers: authHeaders() });
-  return handle(res);
-}
-
-/** GET /api/users/:id  — détail d'un utilisateur */
-export async function getUser(id) {
-  const res = await fetch(`${API_BASE}/users/${id}`, { headers: authHeaders() });
   return handle(res);
 }
 

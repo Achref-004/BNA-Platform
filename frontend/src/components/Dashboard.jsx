@@ -3,7 +3,8 @@
 // Aucune logique modifiée.
 // ============================================================
 import { useState } from "react";
-import { BNA, GRADIENTS, GLASS, POWERBI_EMBED_URL } from "../styles/theme";
+import { BNA, GRADIENTS, GLASS } from "../styles/theme";
+import { POWERBI_EMBED_URL } from "../config";
 
 export default function Dashboard() {
   const [loaded, setLoaded] = useState(false);

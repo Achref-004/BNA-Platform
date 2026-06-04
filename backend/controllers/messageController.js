@@ -254,21 +254,6 @@ async function detailMyThread(req, res) {
 
 /* ── Admin : inbox ─────────────────────────────────────────── */
 
-async function adminUnreadThreadsCount(req, res) {
-  try {
-    const pool = await getPool();
-    const row = await pool.request().query(`
-      SELECT CAST(COUNT(DISTINCT p.thread_id) AS INT) AS unread
-      FROM dbo.MessagePosts p
-      WHERE p.sender_role = N'user' AND p.read_by_admin_at IS NULL
-    `);
-    return res.json({ unread: row.recordset[0]?.unread || 0 });
-  } catch (err) {
-    console.error("messageController.adminUnreadThreadsCount:", err);
-    return res.status(500).json({ error: "Erreur." });
-  }
-}
-
 async function listAdminThreads(req, res) {
   try {
     const {
@@ -498,7 +483,6 @@ module.exports = {
   send,
   listMyThreads,
   detailMyThread,
-  adminUnreadThreadsCount,
   listAdminThreads,
   detailAdminThread,
   adminReply,

@@ -73,10 +73,7 @@ module.exports.renderWelcomeCredentials = function renderWelcomeCredentials({
                  style="display:inline-block;text-decoration:none;background:linear-gradient(135deg,#00C48A 0%,#009A6A 52%,#006B47 100%);color:#ffffff;font-weight:800;font-size:14px;padding:14px 32px;border-radius:999px;box-shadow:0 12px 28px rgba(0,154,106,0.35);">
                 Se connecter
               </a>
-              <p style="margin:18px 0 0;font-size:12px;color:#8FA8A0;line-height:1.55;">
-                Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br>
-                <a href="${escapeHtml(loginUrl)}" style="color:#006B47;word-break:break-all;font-size:11px;">${escapeHtml(loginUrl)}</a>
-              </p>
+            
             </td>
           </tr>
           <tr>

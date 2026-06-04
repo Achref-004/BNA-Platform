@@ -1,7 +1,7 @@
 // ============================================================
 // services/forecastService.js — Client API /api/forecast/*
 // ============================================================
-import { API_BASE } from "../styles/theme";
+import { API_BASE } from "../config";
 import { getToken } from "./authService";
 
 function authHeaders(extra = {}) {

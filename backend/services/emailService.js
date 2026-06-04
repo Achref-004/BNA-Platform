@@ -28,7 +28,7 @@ async function getTransporter() {
     const nodemailer = require("nodemailer");
     transporterPromise = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT) || 587,
+      port: Number(process.env.SMTP_PORT) ,
       secure: process.env.SMTP_SECURE === "true" || process.env.SMTP_SECURE === "1",
       auth: process.env.SMTP_USER ? {
         user: process.env.SMTP_USER,

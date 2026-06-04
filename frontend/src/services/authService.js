@@ -10,7 +10,7 @@
 // Le token JWT est stocké dans localStorage (clé "bna_token") et
 // joint manuellement aux requêtes via l'en-tête Authorization.
 // ============================================================
-import { API_BASE } from "../styles/theme";
+import { API_BASE } from "../config";
 
 const TOKEN_KEY = "bna_token";
 const USER_KEY  = "bna_user";

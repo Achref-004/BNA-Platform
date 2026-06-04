@@ -23,6 +23,20 @@ const DEFAULT_FORM = {
 };
 const PROTECTED_EMAIL = "admin@bna.tn";
 
+// Validation client — mêmes règles/messages que le backend
+// (userController.validatePayload). Renvoie un objet { champ: message }.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validateUserForm(form, mode) {
+  const e = {};
+  if (!form.prenom || form.prenom.trim().length < 2) e.prenom = "Prénom requis (min 2 caractères).";
+  if (!form.nom    || form.nom.trim().length    < 2) e.nom    = "Nom requis (min 2 caractères).";
+  if (!form.email  || !EMAIL_RE.test(form.email.trim())) e.email = "Email invalide.";
+  if (form.code_structure && form.code_structure.length > 5) e.code_structure = "Code structure invalide (max 5 caractères).";
+  if (mode === "edit" && form.mot_de_passe && form.mot_de_passe.length < 6) e.mot_de_passe = "Mot de passe requis (min 6 caractères).";
+  return e;
+}
+
 export default function UserManagement({ currentUser }) {
   const [items, setItems]         = useState([]);
   const [total, setTotal]         = useState(0);
@@ -69,28 +83,26 @@ export default function UserManagement({ currentUser }) {
     setTimeout(() => setToast(null), 3200);
   };
 
+  // En cas d'erreur, on laisse l'exception remonter au formulaire
+  // (UserModal) qui affiche le message sous le champ concerné.
   const handleSave = async (payload, id) => {
-    try {
-      if (id) {
-        await updateUser(id, payload);
-        showToast("success", "Utilisateur mis à jour.");
+    if (id) {
+      await updateUser(id, payload);
+      showToast("success", "Utilisateur mis à jour.");
+    } else {
+      const out = await createUser(payload);
+      let msg = "Utilisateur créé.";
+      if (out.email_delivery === "queued") {
+        msg += " Identifiants et mot de passe temporaire envoyés par email.";
+      } else if (out.temporary_password_preview) {
+        msg += ` Mot de passe temporaire : ${out.temporary_password_preview} (SMTP non configuré ; communiquez-le par un canal sécurisé.).`;
       } else {
-        const out = await createUser(payload);
-        let msg = "Utilisateur créé.";
-        if (out.email_delivery === "queued") {
-          msg += " Identifiants et mot de passe temporaire envoyés par email.";
-        } else if (out.temporary_password_preview) {
-          msg += ` Mot de passe temporaire : ${out.temporary_password_preview} (SMTP non configuré ; communiquez-le par un canal sécurisé.).`;
-        } else {
-          msg += " Pensez à configurer SMTP pour l’envoi automatique des identifiants.";
-        }
-        showToast("success", msg);
+        msg += " Pensez à configurer SMTP pour l’envoi automatique des identifiants.";
       }
-      setModal(null);
-      load();
-    } catch (e) {
-      showToast("error", e.message);
+      showToast("success", msg);
     }
+    setModal(null);
+    load();
   };
 
   const handleDelete = async (id) => {
@@ -208,11 +220,7 @@ export default function UserManagement({ currentUser }) {
                       <div>
                         <div style={{ fontWeight: 700, color: BNA.textDark }}>
                           {u.prenom} {u.nom}
-                          {u.email?.toLowerCase() === PROTECTED_EMAIL && (
-                            <span style={styles.lockedTag}>🔒 protégé</span>
-                          )}
                         </div>
-                        <div style={{ fontSize: 11, color: BNA.textMuted }}>#{u.id}</div>
                       </div>
                     </div>
                   </Td>
@@ -318,23 +326,38 @@ function UserModal({ mode, user, options, onClose, onSubmit }) {
   );
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  // Met à jour un champ et efface son éventuelle erreur affichée.
+  const set = (k, v) => {
+    setForm(f => ({ ...f, [k]: v }));
+    setFieldErrors(fe => (fe[k] ? { ...fe, [k]: undefined } : fe));
+  };
+
+  const inputStyle = (k) =>
+    fieldErrors[k] ? { ...styles.input, borderColor: BNA.danger } : styles.input;
 
   const submit = async (e) => {
     e.preventDefault();
     setErr("");
+
+    // Validation côté client : message affiché SOUS chaque champ.
+    const fe = validateUserForm(form, mode);
+    setFieldErrors(fe);
+    if (Object.keys(fe).length > 0) return;
+
     setSubmitting(true);
     try {
       const payload = { ...form };
-      if (mode !== "edit") {
-        delete payload.mot_de_passe;
-      } else if (!payload.mot_de_passe) {
-        delete payload.mot_de_passe;
-      }
+      if (mode !== "edit" || !payload.mot_de_passe) delete payload.mot_de_passe;
       await onSubmit(payload);
     } catch (e) {
-      setErr(e.message);
+      // Erreur serveur liée à l'email → rattachée au champ email.
+      if (/email/i.test(e.message || "")) {
+        setFieldErrors(fe2 => ({ ...fe2, email: e.message }));
+      } else {
+        setErr(e.message);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -344,46 +367,49 @@ function UserModal({ mode, user, options, onClose, onSubmit }) {
     <div style={styles.overlay} onClick={onClose}>
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div style={styles.modalHead}>
-          <h2 style={{ margin: 0, fontSize: 18, color: BNA.textDark }}>
-            {mode === "edit" ? "✏️ Modifier l'utilisateur" : "➕ Nouvel utilisateur"}
+          <h2 style={{ margin: 0, fontSize: 18, color: BNA.textDark, display: "flex", alignItems: "center", gap: 8 }}>
+            {mode === "edit"
+              ? <><EditIcon /> Modifier l'utilisateur</>
+              : <><PlusIcon /> Nouvel utilisateur</>}
           </h2>
           <button style={styles.closeBtn} onClick={onClose}>✕</button>
         </div>
 
-        <form onSubmit={submit} style={{ padding: 20, display: "grid", gap: 14 }}>
+        <form onSubmit={submit} noValidate style={{ padding: 20, display: "grid", gap: 14 }}>
           <div style={styles.grid2}>
-            <Field label="Prénom *"><input style={styles.input} value={form.prenom} onChange={(e) => set("prenom", e.target.value)} required /></Field>
-            <Field label="Nom *">   <input style={styles.input} value={form.nom}    onChange={(e) => set("nom", e.target.value)}    required /></Field>
+            <Field label="Prénom *" error={fieldErrors.prenom}>
+              <input style={inputStyle("prenom")} value={form.prenom} onChange={(e) => set("prenom", e.target.value)} />
+            </Field>
+            <Field label="Nom *" error={fieldErrors.nom}>
+              <input style={inputStyle("nom")} value={form.nom} onChange={(e) => set("nom", e.target.value)} />
+            </Field>
           </div>
 
-          <Field label="Email *">
-            <input type="email" style={styles.input} value={form.email}
-                   onChange={(e) => set("email", e.target.value)} required />
+          <Field label="Email *" error={fieldErrors.email}>
+            <input type="email" style={inputStyle("email")} value={form.email}
+                   onChange={(e) => set("email", e.target.value)} />
           </Field>
 
           {mode === "edit" ? (
-            <Field label="Mot de passe (laisser vide pour ne pas changer)">
+            <Field label="Mot de passe" error={fieldErrors.mot_de_passe}>
               <input
                 type="password"
-                style={styles.input}
+                style={inputStyle("mot_de_passe")}
                 value={form.mot_de_passe}
                 onChange={(e) => set("mot_de_passe", e.target.value)}
                 placeholder="••••••"
                 autoComplete="new-password"
-                minLength={0}
               />
             </Field>
           ) : (
             <div style={styles.emailHint}>
-              Le mot de passe est généré automatiquement côté serveur et envoyé par email lorsque
-              le SMTP est configuré. Sinon, une prévisualisation temporaire s’affichera après la
-              création.
+              Le mot de passe est généré automatiquement.
             </div>
           )}
 
           <div style={styles.grid2}>
-            <Field label="Code structure">
-              <input style={styles.input} value={form.code_structure || ""}
+            <Field label="Code structure" error={fieldErrors.code_structure}>
+              <input style={inputStyle("code_structure")} value={form.code_structure || ""}
                      onChange={(e) => set("code_structure", e.target.value)}
                      placeholder="ex: 900" />
             </Field>
@@ -472,7 +498,7 @@ function Toast({ type, message }) {
   );
 }
 
-function Field({ label, children }) {
+function Field({ label, error, children }) {
   return (
     <div>
       <label style={{
@@ -480,6 +506,7 @@ function Field({ label, children }) {
         color: BNA.textMuted, marginBottom: 6,
       }}>{label}</label>
       {children}
+      {error && <div style={styles.fieldError}>⚠ {error}</div>}
     </div>
   );
 }
@@ -656,12 +683,6 @@ const styles = {
     color: "#fff", fontWeight: 800, fontSize: 14,
     display: "flex", alignItems: "center", justifyContent: "center",
   },
-  lockedTag: {
-    marginLeft: 8, fontSize: 10, fontWeight: 700,
-    background: "#FFF1DD", color: "#9A5A00",
-    padding: "2px 6px", borderRadius: 8,
-  },
-
   iconBtn: {
     border: "none", background: "transparent",
     width: 30, height: 30, borderRadius: 8,
@@ -729,6 +750,10 @@ const styles = {
     background: BNA.dangerSoft, border: "1px solid #FFCCCC",
     borderRadius: 10, padding: "10px 14px",
     color: BNA.danger, fontSize: 13,
+  },
+  fieldError: {
+    marginTop: 6, fontSize: 12, fontWeight: 600,
+    color: BNA.danger, display: "flex", alignItems: "center", gap: 4,
   },
   warnCircle: {
     width: 56, height: 56, borderRadius: "50%",

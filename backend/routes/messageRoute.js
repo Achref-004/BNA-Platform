@@ -22,7 +22,6 @@ router.get ("/my-threads",           ctrl.listMyThreads);
 router.get ("/my-threads/:id",       ctrl.detailMyThread);
 
 /* ─ Administration (routes explicites) ─ */
-router.get ("/admin/threads/unread-count", adminOnly, ctrl.adminUnreadThreadsCount);
 router.get ("/admin/threads",               adminOnly, ctrl.listAdminThreads);
 router.delete("/admin/threads/:id",        adminOnly, ctrl.adminDeleteThread);
 router.get ("/admin/threads/:id",           adminOnly, ctrl.detailAdminThread);

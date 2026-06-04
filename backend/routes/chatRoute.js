@@ -84,7 +84,14 @@ Colonnes: ID_MATURITE (1-14), LIB_TRANCHE, NB_JOURS_MIN, NB_JOURS_MAX, ORDRE, ..
 Colonnes: ID_ACTIVITE, KEY_ACT, LIB_ACTIVITE, ...
 `;
 
-let history = [];
+// Historique de conversation PAR utilisateur (clé = id JWT `sub`).
+// Évite que le contexte d'un utilisateur ne fuite vers les autres.
+const historyByUser = new Map();
+
+function getUserHistory(userId) {
+  if (!historyByUser.has(userId)) historyByUser.set(userId, []);
+  return historyByUser.get(userId);
+}
 
 async function summarizeHistory(messages) {
   const completion = await groq.chat.completions.create({
@@ -100,10 +107,12 @@ async function summarizeHistory(messages) {
 }
 
 // ── Étape 1 : Générer le SQL via Groq ──────────────────────
-async function generateSQL(question, scope) {
+async function generateSQL(question, scope, userId) {
   const currentMonth = new Date().getMonth() + 1;
   const currentYear  = new Date().getFullYear();
 
+  // Copie de travail de l'historique propre à cet utilisateur.
+  let history = getUserHistory(userId).slice();
   history.push({ role: "user", content: question });
 
   if (history.length > 8) {
@@ -268,6 +277,7 @@ Règles :
     .trim();
 
   history.push({ role: "assistant", content: generatedSql });
+  historyByUser.set(userId, history); // persiste l'historique de CET utilisateur
   return generatedSql;
 }
 
@@ -361,7 +371,7 @@ router.post("/", async (req, res) => {
     }
 
     try {
-      sqlQuery = await generateSQL(trimmedQ, scope);
+      sqlQuery = await generateSQL(trimmedQ, scope, user.sub);
     } catch (err) {
       console.error("❌ Erreur Groq (génération SQL):", err.message);
       return res.status(502).json({ response: "Le service d'IA est momentanément indisponible. Réessayez dans quelques instants." });

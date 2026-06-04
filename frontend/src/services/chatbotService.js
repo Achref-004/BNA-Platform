@@ -5,7 +5,7 @@
 // Le backend traduit la question en SQL, l'exécute, puis
 // formate la réponse en langage naturel.
 // ============================================================
-import { API_BASE } from "../styles/theme";
+import { API_BASE } from "../config";
 import { getToken } from "./authService";
 
 /**

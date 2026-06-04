@@ -22,6 +22,10 @@ ml-forecast/outputs/*
 
 # misc
 .DS_Store
+
+# Secrets / variables d'environnement (ne jamais versionner)
+.env
+.env.*
 .env.local
 .env.development.local
 .env.test.local

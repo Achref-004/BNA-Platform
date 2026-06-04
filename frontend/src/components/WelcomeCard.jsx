@@ -10,6 +10,7 @@ import BackgroundFX from "./BackgroundFX";
 export default function WelcomeCard({ user, onLogout }) {
   const navigate = useNavigate();
   const { openChatbot } = useChatbot();
+  const isAdmin = user?.role === "Admin";
 
   return (
     <div style={styles.page}>
@@ -105,6 +106,24 @@ export default function WelcomeCard({ user, onLogout }) {
             text="Anticipation des placements."
             onClick={() => navigate("/prevision")}
           />
+          {isAdmin && (
+            <>
+              <ActionCard
+                tone="primary"
+                icon={<AdminIcon />}
+                title="Administration"
+                text="Gérer les utilisateurs."
+                onClick={() => navigate("/utilisateurs")}
+              />
+              <ActionCard
+                tone="mint"
+                icon={<MailIcon />}
+                title="Administration"
+                text="Gérer les messages."
+                onClick={() => navigate("/admin/messages")}
+              />
+            </>
+          )}
         </section>
       </div>
     </div>
@@ -120,7 +139,7 @@ function ActionCard({ tone, icon, title, text, onClick, badge }) {
       onClick={onClick}
       style={{
         ...styles.actionCard,
-        ...(tone === "ai"      ? styles.actionAI :
+        ...(          tone === "ai"      ? styles.actionAI :
            tone === "mint"     ? styles.actionMint :
                                  styles.actionPrimary),
       }}
@@ -179,6 +198,24 @@ function ChartUpIcon() {
          strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 17 9 11 13 15 21 7" />
       <path d="M15 7h6v6" />
+    </svg>
+  );
+}
+function AdminIcon() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff"
+         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" />
+      <path d="M9.5 12l2 2 3.5-4" />
+    </svg>
+  );
+}
+function MailIcon() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff"
+         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3 7l9 6 9-6" />
     </svg>
   );
 }

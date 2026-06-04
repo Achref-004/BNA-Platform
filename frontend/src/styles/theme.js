@@ -62,8 +62,3 @@ export const GLASS = {
     boxShadow:     "0 14px 40px rgba(0, 90, 60, 0.10)",
   },
 };
-
-export const POWERBI_EMBED_URL =
-  "https://app.powerbi.com/reportEmbed?reportId=2f1c734e-50a9-44e7-a603-4048f24de852&autoAuth=true&ctid=dbd6664d-4eb9-46eb-99d8-5c43ba153c61";
-
-export const API_BASE = "http://localhost:5000/api";
