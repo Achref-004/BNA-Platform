@@ -47,29 +47,16 @@ function fmtRmse(value) {
 }
 
 function buildSeriesPoints(chartData) {
-  if (!chartData?.history?.length) return [];
-  const byDate = new Map();
+  const forecast = chartData?.forecast || [];
+  if (!forecast.length) return [];
 
-  for (const h of chartData.history) {
-    byDate.set(h.date, {
-      date: h.date,
-      label: formatMonthLabel(h.date),
-      historique: h.montant,
-      prevu: null,
-    });
-  }
-  for (const f of chartData.forecast || []) {
-    const existing = byDate.get(f.date) || {
+  return forecast
+    .map((f) => ({
       date: f.date,
       label: formatMonthLabel(f.date),
-      historique: null,
-      prevu: null,
-    };
-    existing.prevu = f.montant;
-    byDate.set(f.date, existing);
-  }
-
-  return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
+      prevu: f.montant,
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 function formatMonthLabel(isoDate) {
@@ -199,9 +186,9 @@ export default function ForecastCharts({ chartData, comparisonRanked, bestModelN
 
       {seriesData.length > 0 && (
         <section style={chartCard}>
-          <h3 style={chartTitle}>Historique et prévision (année suivante)</h3>
+          <h3 style={chartTitle}>Prévision (année suivante)</h3>
           <p style={chartHint}>
-            Vert : historique. Doré pointillé : prévision 12 mois (meilleur modèle).
+            Doré pointillé : prévision sur 12 mois (meilleur modèle).
           </p>
           <div style={chartBoxTall}>
             <ResponsiveContainer width="100%" height="100%">
@@ -221,25 +208,6 @@ export default function ForecastCharts({ chartData, comparisonRanked, bestModelN
                   content={<SeriesTooltip />}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Line
-                  type="monotone"
-                  dataKey="historique"
-                  name="Historique"
-                  stroke={BNA.greenDark}
-                  strokeWidth={2.5}
-                  dot={(props) => (
-                    <LineHoverDot
-                      {...props}
-                      dataKey="historique"
-                      fill={BNA.greenDark}
-                      name="Historique"
-                      onHover={setSeriesHover}
-                      onLeave={() => setSeriesHover(null)}
-                    />
-                  )}
-                  activeDot={false}
-                  connectNulls={false}
-                />
                 <Line
                   type="monotone"
                   dataKey="prevu"

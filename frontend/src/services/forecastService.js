@@ -2,21 +2,7 @@
 // services/forecastService.js — Client API /api/forecast/*
 // ============================================================
 import { API_BASE } from "../config";
-import { getToken } from "./authService";
-
-function authHeaders(extra = {}) {
-  const headers = { ...extra };
-  const t = getToken();
-  if (t) headers.Authorization = `Bearer ${t}`;
-  return headers;
-}
-
-async function handle(res) {
-  let data = {};
-  try { data = await res.json(); } catch { /* empty */ }
-  if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`);
-  return data;
-}
+import { authHeaders, handle } from "./apiClient";
 
 export async function uploadForecastFile(file) {
   const fd = new FormData();

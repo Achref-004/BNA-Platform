@@ -18,6 +18,9 @@ import {
   adminThreadDetail,
 } from "../services/messageService";
 import { formatDate } from "../utils/format";
+import useToast from "../hooks/useToast";
+import Toast from "./Toast";
+import ErrorBanner from "./ErrorBanner";
 
 export default function AdminMessages() {
   const [items, setItems]   = useState([]);
@@ -31,18 +34,15 @@ export default function AdminMessages() {
   const [detail, setDetail]   = useState(null);
   const [reply, setReply]     = useState("");
   const [sending, setSending] = useState(false);
-  const [toast, setToast]   = useState("");
+  const [error, setError]   = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
-
-  const showToast = (msg) => {
-    setToast(msg);
-    setTimeout(() => setToast(""), 3200);
-  };
+  const { toast, showToast } = useToast();
 
   const PAGE_SIZE = 10;
 
   const loadList = useCallback(async () => {
     setLoading(true);
+    setError("");
     try {
       const d = await adminListThreads({
         search,
@@ -54,7 +54,7 @@ export default function AdminMessages() {
       setItems(d.items || []);
       setTotal(d.total || 0);
     } catch (e) {
-      showToast(e.message);
+      setError(e.message);
     } finally {
       setLoading(false);
     }
@@ -64,12 +64,13 @@ export default function AdminMessages() {
 
   const openDetail = async (id) => {
     setSelectedId(id);
+    setError("");
     try {
       const d = await adminThreadDetail(id);
       setDetail(d);
       setReply("");
     } catch (e) {
-      showToast(e.message);
+      setError(e.message);
     }
   };
 
@@ -99,6 +100,7 @@ export default function AdminMessages() {
       setConfirmOpen(false);
       setDetail(null);
       setSelectedId(null);
+      showToast("Fil supprimé.");
       await loadList();
     } catch (e) {
       setConfirmOpen(false);
@@ -117,6 +119,8 @@ export default function AdminMessages() {
           <p style={styles.subtitle}>{total} conversation{total > 1 ? "s" : ""}</p>
         </div>
       </header>
+
+      <ErrorBanner message={error} />
 
       <div style={styles.grid}>
         <aside style={{ ...styles.card, overflow: "hidden" }}>
@@ -273,7 +277,7 @@ export default function AdminMessages() {
         />
       )}
 
-      {toast && <div style={styles.toast}>{toast}</div>}
+      <Toast message={toast} />
     </div>
   );
 }
@@ -472,18 +476,6 @@ const styles = {
     border: `1px solid ${BNA.border}`,
     cursor: "pointer",
     fontWeight: 800,
-  },
-  toast: {
-    position: "fixed",
-    bottom: 24,
-    left: "50%",
-    transform: "translateX(-50%)",
-    padding: "12px 20px",
-    borderRadius: 12,
-    background: BNA.greenDark,
-    color: "#fff",
-    fontWeight: 700,
-    zIndex: 10001,
   },
   /** Modal de confirmation : aligné sur UserManagement.jsx (suppression utilisateur). */
   overlay: {

@@ -11,6 +11,8 @@ import {
   getForecastPreview,
   getForecastStatus,
 } from "../services/forecastService";
+import useToast from "../hooks/useToast";
+import Toast from "./Toast";
 
 /** Affiche une métrique ou « — » si absente (échec modèle / ancien export). */
 function fmtMetric(v) {
@@ -32,13 +34,8 @@ export default function Forecast() {
   const [statusMsg, setStatusMsg] = useState("");
   const [results, setResults] = useState(null);
   const [forecast, setForecast] = useState(null);
-  const [toast, setToast] = useState("");
   const [activeTab, setActiveTab] = useState("pipeline");
-
-  const showToast = (m) => {
-    setToast(m);
-    setTimeout(() => setToast(""), 4000);
-  };
+  const { toast, showToast } = useToast(4000);
 
   const refreshResults = useCallback(async () => {
     try {
@@ -275,7 +272,7 @@ export default function Forecast() {
         </section>
       )}
 
-      {toast && <div style={styles.toast}>{toast}</div>}
+      <Toast message={toast} />
     </div>
   );
 }
@@ -406,10 +403,5 @@ const styles = {
     border: `1px solid ${BNA.danger}`,
     color: BNA.textDark,
     fontSize: 13,
-  },
-  toast: {
-    position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)",
-    background: BNA.greenDark, color: "#fff", padding: "12px 20px",
-    borderRadius: 12, fontWeight: 700, zIndex: 10001,
   },
 };

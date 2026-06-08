@@ -112,6 +112,8 @@ def detect_dw_columns(df: pd.DataFrame) -> dict:
 
 def _treat_outliers_iqr(series: pd.Series) -> tuple[pd.Series, int]:
 
+    series = series.astype(float)
+
     q1, q3 = series.quantile(0.25), series.quantile(0.75)
 
     iqr = q3 - q1
@@ -226,7 +228,7 @@ def preprocess(df_raw: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
 
         if c in df.columns:
 
-            df[c] = pd.to_numeric(df[c], errors="coerce")
+            df[c] = pd.to_numeric(df[c], errors="coerce").astype(float)
 
     for c in ("nb_placements", "taux_moyen", "duree_moyenne"):
 

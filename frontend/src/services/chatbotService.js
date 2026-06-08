@@ -6,7 +6,7 @@
 // formate la réponse en langage naturel.
 // ============================================================
 import { API_BASE } from "../config";
-import { getToken } from "./authService";
+import { authHeaders } from "./apiClient";
 
 /**
  * Pose une question au chatbot BNA.
@@ -17,13 +17,9 @@ import { getToken } from "./authService";
  * @throws  {Error}            Avec le message renvoyé par le backend
  */
 export async function askChatbot(question, user) {
-  const headers = { "Content-Type": "application/json" };
-  const token = getToken();
-  if (token) headers.Authorization = `Bearer ${token}`;
-
   const res = await fetch(`${API_BASE}/chat`, {
     method: "POST",
-    headers,
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ question, user }),
   });
 

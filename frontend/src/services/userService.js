@@ -6,29 +6,7 @@
 // l'en-tête Authorization: Bearer <token>.
 // ============================================================
 import { API_BASE } from "../config";
-import { getToken } from "./authService";
-
-/** Construit les headers d'auth (+ extras éventuels). */
-function authHeaders(extra = {}) {
-  const headers = { ...extra };
-  const t = getToken();
-  if (t) headers.Authorization = `Bearer ${t}`;
-  return headers;
-}
-
-/**
- * Wrapper unique pour parser la réponse fetch :
- *   • lit le JSON si présent
- *   • lève une Error contenant `error` (renvoyé par le backend) si !res.ok
- */
-async function handle(res) {
-  let data = {};
-  try { data = await res.json(); } catch { /* corps non JSON */ }
-  if (!res.ok) {
-    throw new Error(data.error || `Erreur ${res.status}`);
-  }
-  return data;
-}
+import { authHeaders, handle } from "./apiClient";
 
 /**
  * Liste paginée + filtrée des utilisateurs.

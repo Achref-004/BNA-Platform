@@ -5,21 +5,7 @@
 // JWT joint automatiquement (Authorization Bearer).
 // ============================================================
 import { API_BASE } from "../config";
-import { getToken } from "./authService";
-
-function authHeaders(extra = {}) {
-  const headers = { ...extra };
-  const t = getToken();
-  if (t) headers.Authorization = `Bearer ${t}`;
-  return headers;
-}
-
-async function handle(res) {
-  let data = {};
-  try { data = await res.json(); } catch { /* no json */ }
-  if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`);
-  return data;
-}
+import { authHeaders, handle } from "./apiClient";
 
 /** POST nouveau fil ou nouveau message utilisateur ({ thread_id?, sujet?, message }) */
 export async function sendUserMessage(payload) {

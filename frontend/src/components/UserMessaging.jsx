@@ -15,13 +15,16 @@ import {
   getMyThread,
 } from "../services/messageService";
 import { formatDate } from "../utils/format";
+import useToast from "../hooks/useToast";
+import Toast from "./Toast";
+import ErrorBanner from "./ErrorBanner";
 
 export default function UserMessaging() {
   const [items, setItems] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [detail, setDetail]   = useState(null);
   const [loadingList, setLoadingList] = useState(true);
-  const [toast, setToast] = useState("");
+  const [error, setError] = useState("");
 
   const [newSubject, setNewSubject]       = useState("");
   const [newBody, setNewBody]             = useState("");
@@ -29,18 +32,16 @@ export default function UserMessaging() {
   const [composerMode, setComposerMode]   = useState(null);
   const [sending, setSending]             = useState(false);
 
-  const showToast = (msg) => {
-    setToast(msg);
-    setTimeout(() => setToast(""), 3400);
-  };
+  const { toast, showToast } = useToast(3400);
 
   const refreshList = useCallback(async () => {
     setLoadingList(true);
+    setError("");
     try {
       const d = await listMyThreads();
       setItems(d.items || []);
     } catch (e) {
-      showToast(e.message || "Impossible de charger la liste.");
+      setError(e.message || "Impossible de charger la liste.");
     } finally {
       setLoadingList(false);
     }
@@ -53,12 +54,13 @@ export default function UserMessaging() {
   const selectThread = async (id) => {
     setSelectedId(id);
     setComposerMode(null);
+    setError("");
     try {
       const pack = await getMyThread(id);
       setDetail(pack);
       setReplyBody("");
     } catch (e) {
-      showToast(e.message);
+      setError(e.message);
     }
   };
 
@@ -124,6 +126,8 @@ export default function UserMessaging() {
           + Nouvelle conversation
         </button>
       </header>
+
+      <ErrorBanner message={error} />
 
       <div style={styles.split}>
         <aside style={styles.listCard}>
@@ -260,7 +264,7 @@ export default function UserMessaging() {
         </section>
       </div>
 
-      {toast && <div style={styles.toast}>{toast}</div>}
+      <Toast message={toast} />
     </div>
   );
 }
@@ -395,16 +399,4 @@ const styles = {
   muted: { color: BNA.textMuted, fontSize: 13 },
   empty: { color: BNA.textMuted, fontStyle: "italic", fontSize: 13 },
   placeholder: { color: BNA.textMuted, textAlign: "center", padding: "72px 12px", fontSize: 14 },
-  toast: {
-    position: "fixed",
-    bottom: 24,
-    left: "50%",
-    transform: "translateX(-50%)",
-    background: BNA.greenDark,
-    color: "#fff",
-    padding: "12px 20px",
-    borderRadius: 12,
-    fontWeight: 700,
-    zIndex: 10001,
-  },
 };

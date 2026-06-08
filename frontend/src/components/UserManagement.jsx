@@ -12,6 +12,7 @@ import {
   listUsers, createUser, updateUser, deleteUser, getOptions,
 } from "../services/userService";
 import { formatDate } from "../utils/format";
+import ErrorBanner from "./ErrorBanner";
 
 // Rôles assignables dans le formulaire : Admin EXCLU.
 const ASSIGNABLE_ROLES = ["Agence", "Direction regional", "Direction central"];
@@ -185,9 +186,7 @@ export default function UserManagement({ currentUser }) {
       {/* Table */}
       <section style={styles.tableCard}>
         {loading && <LoaderBar />}
-        {error && (
-          <div style={styles.errorBox}>⚠️ {error}</div>
-        )}
+        <ErrorBanner message={error} />
 
         <div style={{ overflowX: "auto" }}>
           <table style={styles.table}>
@@ -442,7 +441,7 @@ function UserModal({ mode, user, options, onClose, onSubmit }) {
             </div>
           </Field>
 
-          {err && <div style={styles.errorBox}>⚠️ {err}</div>}
+          <ErrorBanner message={err} />
 
           <div style={styles.modalActions}>
             <button type="button" onClick={onClose} style={styles.btnGhost}>Annuler</button>
@@ -746,11 +745,6 @@ const styles = {
     cursor: "pointer", boxShadow: "0 8px 20px rgba(0,154,106,0.28)",
   },
 
-  errorBox: {
-    background: BNA.dangerSoft, border: "1px solid #FFCCCC",
-    borderRadius: 10, padding: "10px 14px",
-    color: BNA.danger, fontSize: 13,
-  },
   fieldError: {
     marginTop: 6, fontSize: 12, fontWeight: 600,
     color: BNA.danger, display: "flex", alignItems: "center", gap: 4,
