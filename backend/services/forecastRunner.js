@@ -66,7 +66,7 @@ function runPipeline(inputPath) {
       return reject(new Error("Un entraînement est déjà en cours."));
     }
 
-    const pythonBin = process.env.PYTHON_PATH || "python";
+    const pythonBin = process.env.PYTHON_PATH ;
     const { outputDir } = ensureDirs();
 
     trainingState = {
@@ -84,7 +84,7 @@ function runPipeline(inputPath) {
     ];
 
     console.log("🐍 Forecast pipeline:", pythonBin, args.join(" "));
-
+//Node excuter la commande dans le CMD :
     const proc = spawn(pythonBin, args, {
       cwd: ML_ROOT,
       env: { ...process.env, PYTHONUTF8: "1" },
@@ -99,6 +99,7 @@ function runPipeline(inputPath) {
       console.log("[forecast]", text.trim());
     });
 
+    //"close" Python a démarré, puis s'est terminé (bien ou mal)
     proc.on("close", (code) => {
       trainingState.finishedAt = new Date().toISOString();
       const summary = readSummary();
@@ -121,6 +122,8 @@ function runPipeline(inputPath) {
       return reject(new Error(trainingState.message));
     });
 
+
+    //"error" Python n'a pas pu démarrer du tout
     proc.on("error", (err) => {
       trainingState.status = "error";
       trainingState.finishedAt = new Date().toISOString();
@@ -139,3 +142,16 @@ module.exports = {
   ML_ROOT,
   SCRIPT,
 };
+
+
+//spawn(python, args)
+ //      │
+ //      ├── proc.stdout → logs en temps réel dans la console
+  //     ├── proc.stderr → erreurs accumulées dans stderr
+   //    │
+    //   ├── proc.on("error") → Python n'a pas démarré 
+     //  │        └── reject(err)
+     //  │
+      //c.on("close", code)
+          //      ├── code=0 + summary ok → resolve(summary) 
+            //    └── sinon → reject(new Error(...)) 

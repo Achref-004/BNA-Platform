@@ -439,7 +439,7 @@ async function adminReply(req, res) {
           recipientPrenom: th.prenom,
           threadSubject: th.subject,
           replyPreview: bodyTxt,
-          messagesUrlOverride: `${(process.env.FRONTEND_BASE_URL || "http://localhost:3000").replace(/\/+$/, "")}/messagerie`,
+          messagesUrlOverride: `${(process.env.FRONTEND_BASE_URL ).replace(/\/+$/, "")}/messagerie`,
         });
       } catch (e) {
         console.warn("email reply notify:", e?.message || e);

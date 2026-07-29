@@ -8,7 +8,7 @@
 // 🔒 RÈGLE FONCTIONNELLE — UN SEUL ADMIN
 // ----------------------------------------------------------
 // Le système ne fonctionne qu'avec UN admin principal unique
-// (le compte technique `admin@bna.tn`, créé par le seed initial).
+// (le compte technique `admin@bna.tn`).
 // Conséquences :
 //   • CREATE → on refuse tout payload avec role === "Admin"
 //   • UPDATE → on refuse toute promotion vers le rôle "Admin"

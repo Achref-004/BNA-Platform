@@ -8,7 +8,9 @@
 //   GET  /api/forecast/predict → prévisions (12 mois année suivante)
 //   GET  /api/forecast/status      → état entraînement
 // ============================================================
+//module pour Manipule les chemins
 const path = require("path");
+//module pour Manipule les fichier
 const fs = require("fs");
 const {
   getPaths,

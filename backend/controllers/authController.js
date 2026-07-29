@@ -13,9 +13,9 @@ const jwt    = require("jsonwebtoken");
 const { mssql, getPool } = require("../config/db");
 require("dotenv").config();
 
-const JWT_SECRET     = process.env.JWT_SECRET     || "bna-dev-secret-change-me";
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
-const PASSWORD_POLICY_RE = /^(?=.*[A-Za-z])(?=.*\d).{10,}$/;
+const JWT_SECRET     = process.env.JWT_SECRET     ;
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
+const PASSWORD_POLICY_RE = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
 
 function signJwt(userRecord) {
   const mcpFlag = !!(userRecord.must_change_password === true
@@ -113,7 +113,7 @@ async function changePassword(req, res) {
     }
     if (typeof newPassword !== "string" || !PASSWORD_POLICY_RE.test(newPassword)) {
       return res.status(400).json({
-        error: "Nouveau mot de passe : min 10 caractères avec au moins une lettre et un chiffre.",
+        error: "Nouveau mot de passe : min 6 caractères avec au moins une lettre et un chiffre.",
       });
     }
 

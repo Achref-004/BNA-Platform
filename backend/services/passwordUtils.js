@@ -16,7 +16,7 @@ const SYMBOL = "@#$%*-";
  * @param {number} [length=14]
  * @returns {string} Mot de passe aléatoire (lettres + chiffres + symbole)
  */
-function generateSecureTemporaryPassword(length = 14) {
+function generateSecureTemporaryPassword(length = 10) {
   const chars = ALPHA + DIGIT + SYMBOL;
   const bytes = crypto.randomBytes(length);
   let out = "";

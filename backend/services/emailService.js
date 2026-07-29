@@ -51,7 +51,7 @@ async function sendMail({ to, subject, html, text }) {
     return { skipped: true };
   }
 
-  const from = process.env.SMTP_FROM || process.env.SMTP_USER || "BNA Dashboard <noreply@localhost>";
+  const from = process.env.SMTP_FROM || process.env.SMTP_USER ;
 
   await t.sendMail({
     from,
@@ -67,8 +67,7 @@ const { renderWelcomeCredentials, renderUserReplyReceived } = require("../templa
 
 async function sendWelcomeCredentialsEmail({ toEmail, nom, prenom, email, role, temporaryPassword }) {
   const loginUrl =
-    process.env.FRONTEND_LOGIN_URL?.trim()
-    || "http://localhost:3000/login";
+    process.env.FRONTEND_LOGIN_URL?.trim();
 
   const html = renderWelcomeCredentials({
     nom, prenom, email, role,
@@ -78,7 +77,7 @@ async function sendWelcomeCredentialsEmail({ toEmail, nom, prenom, email, role, 
 
   return sendMail({
     to: toEmail,
-    subject: "[BNA] Vos identifiants de connexion au portail",
+    subject: "BNA :Vos identifiants de connexion au portail",
     html,
     text: `${prenom} ${nom},\nEmail: ${email}\nRôle: ${role}\nMot de passe temporaire: ${temporaryPassword}\nConnexion: ${loginUrl}\nÀ changer au premier passage.`,
   });
@@ -89,7 +88,7 @@ async function sendUserReplyReceivedEmail({
 }) {
   const messagesUrl =
     messagesUrlOverride?.trim()
-    || `${process.env.FRONTEND_BASE_URL?.replace(/\/+$/, "") || "http://localhost:3000"}/messagerie`;
+    || `${process.env.FRONTEND_BASE_URL?.replace(/\/+$/, "") }/messagerie`;
 
   const html = renderUserReplyReceived({
     recipientPrenom,
@@ -100,7 +99,7 @@ async function sendUserReplyReceivedEmail({
 
   return sendMail({
     to: toEmail,
-    subject: `[BNA] Réponse à votre message : ${threadSubject.slice(0, 70)}`,
+    subject: `BNA: Réponse à votre message : ${threadSubject.slice(0, 70)}`,
     html,
     text: `Une réponse a été envoyée au sujet « ${threadSubject} ».\nVoir : ${messagesUrl}`,
   });
