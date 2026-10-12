@@ -224,8 +224,7 @@ The forecasting component is confirmed as implemented. The frontend uploads `.cs
 The implemented metrics are RMSE and SMAPE. 
 #### Integration Opportunities
 
-The current forecast outputs are exposed through the platform's forecast page. Future work can publish validated forecasts to Power BI, persist model versions and training metadata in SQL Server, schedule retraining, add confidence intervals and monitor drift. These are evolution paths, not claims about current implementation.
-
+The current forecast outputs are exposed through the platform's forecast page. 
 ## Technology Stack
 
 | Layer | Technologies confirmed in the repository |
@@ -419,3 +418,20 @@ This project was developed as a final-year academic project. Add the verified co
 This project is distributed under the ISC License.
 See [`LICENSE`](LICENCE)
 
+## Achref Bejaoui
+
+Master's student in Data Science, with a degree in Business Computing.
+
+Areas of interest:
+
+- Data Science
+- Data Analytics
+- Artificial Intelligence
+- AI Agents
+- Machine Learning
+- Power BI
+- Backend Engineering
+- Data Engineering
+
+[LinkedIn](www.linkedin.com/in/achref-bejaoui00) ·
+[GitHub](https://github.com/Achref-004)
