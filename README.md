@@ -448,48 +448,14 @@ The backend code is configured for the local frontend origins `http://localhost:
 The backend also exposes `GET /api/health` for a basic API availability check. Forecast execution additionally requires a working Python executable and all packages in `ml-forecast/requirements.txt`.
 
 ## Project Structure
+<p align="center">
+  <img
+    src="frontend/public/Architecture de Projet BNA _ Frontend, Backend et ML.png"
+    alt="Project Structure"
+  >
+</p>
 
-```text
-backend/
-  config/              SQL Server connection pools
-  controllers/         Authentication, users, messages, notifications, forecasts
-  middleware/          JWT, role and first-login guards
-  routes/              Express API route groups
-  services/            Chat scope, email and forecast orchestration
-  templates/email/     Welcome credential email template
-  data/forecast/       Forecast uploads and generated outputs
-  server.js            Express entry point
-frontend/
-  public/              Static HTML and manifest
-  src/components/      Reusable UI modules
-  src/context/         Chatbot context
-  src/hooks/            Authentication, notifications and toast hooks
-  src/pages/           Routed application pages
-  src/routes/          React route configuration
-  src/services/        API client services
-  src/styles/          Theme and global styles
-  App.js               React entry component
-ml-forecast/
-  models/              SARIMA, Random Forest and XGBoost implementations
-  metrics.py           RMSE and SMAPE
-  preprocessing.py     Input normalization and cleaning
-  pipeline.py          Training, evaluation and export orchestration
-  train_and_predict.py Python CLI called by Node.js
-  requirements.txt     Python dependencies
-```
 
-## Screenshots and Demonstrations
-
-Screenshots are not included in the current repository. Add approved, anonymized images here before publishing the project:
-
-```text
-docs/screenshots/login.png
-docs/screenshots/dashboard.png
-docs/screenshots/forecast.png
-docs/screenshots/chatbot.png
-```
-
-Do not include real customer information, credentials, tokens, internal URLs or confidential banking data in demonstrations. A future demo section should cover login, dashboard filtering, forecast execution, chatbot scope and administrator user management.
 
 ## Testing and Validation
 
@@ -507,37 +473,29 @@ Power BI refresh, SSIS data quality checks, SQL Server permissions and SQL Agent
 
 ## Current Limitations
 
-- SSIS packages, ODS definitions, SQL Agent jobs and Power BI authoring files are external to this repository.
-- The exact Power BI measures, refresh schedule and workspace security are not visible in source code.
 - A self-service forgotten-password/reset flow is not confirmed.
-- The JWT is stored in browser `localStorage` by the current frontend.
 - Chat history is held in backend process memory and is lost when the server restarts.
-- Forecast state and generated files use local filesystem storage and a single training run per server instance.
 - Forecast results depend on the uploaded data; no benchmark dataset or fixed score is included.
 - No automated test suite, migration system or database deployment scripts are included.
-- A complete immutable business audit trail is not visible in the repository.
+
 
 ## Future Improvements
 
-1. Version SQL migrations, Data Warehouse contracts and sanitized seed data.
-2. Add SSIS packages or an equivalent documented ETL deployment and monitoring process.
-3. Version the Power BI semantic model, DAX measures and refresh configuration in an appropriate controlled repository.
-4. Implement a secure forgotten-password workflow with expiring, single-use reset tokens.
-5. Move secrets and environment-specific frontend configuration out of source code.
-6. Replace process-local chat history and forecast state with durable, access-controlled storage.
-7. Add automated unit, integration, security and end-to-end tests.
-8. Strengthen production controls with HTTPS, rate limiting, CSP, secret rotation, auditing and database least privilege.
-9. Persist model versions, data lineage, training metadata and forecast monitoring results.
-10. Publish validated predictions and confidence information to Power BI and operational screens.
+1. Implement a secure forgotten-password workflow with expiring, single-use reset tokens.
+2. Replace process-local chat history and forecast state with durable, access-controlled storage.
+3. Add automated unit, integration, security and end-to-end tests.
+4. Strengthen production controls with HTTPS, rate limiting, CSP, secret rotation, auditing and database least privilege.
+5. Persist model versions, data lineage, training metadata and forecast monitoring results.
+6. Publish validated predictions and confidence information to Power BI and operational screens.
 
 ## Contributors
 
 This project was developed as a final-year academic project. Add the verified contributor names, affiliations and contact details before publishing:
 
-| Contributor | Role | Contact |
+| Contributor | Role | 
 | --- | --- | --- |
-| `[Contributor name]` | Project development | `[Contact or profile]` |
-| `[Supervisor name]` | Academic supervision | `[Contact or profile]` |
+| `Bejaoui Achref` | Project development | 
+| `Haji Amel` | Academic supervision | 
 
 ## License
 This project is distributed under the ISC License.
