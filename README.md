@@ -44,7 +44,6 @@
 - [Environment Variables](#environment-variables)
 - [Running the Application](#running-the-application)
 - [Project Structure](#project-structure)
-- [Screenshots and Demonstrations](#screenshots-and-demonstrations)
 - [Testing and Validation](#testing-and-validation)
 - [Current Limitations](#current-limitations)
 - [Future Improvements](#future-improvements)
@@ -68,8 +67,6 @@ BNA Platform addresses this situation by providing:
 - Embedded Power BI reporting for consolidated decision support.
 - A chatbot that translates authorized natural-language questions into controlled analytical queries.
 - A forecasting workflow for historical placement data.
-
-The platform is intended for internal decision support. It must be deployed with appropriate database permissions, network controls and information-security policies before handling production banking data.
 
 ## Project Objectives
 
@@ -172,87 +169,13 @@ The user administration controller enforces a single protected administrator acc
 
 The frontend locally checks the token expiration to avoid sending an obviously expired token; this is only a convenience check. Signature verification remains a backend responsibility.
 
-The confirmed password feature is a mandatory password change through `/api/auth/change-password`. A self-service forgotten-password or password-reset workflow is not confirmed in the repository and is therefore not documented as implemented.
 
-### Operational Traceability
 
-The application stores user creation dates and status information and routes operations through authenticated controllers. Database load timestamps are also represented in the documented Data Warehouse facts. A complete business audit-log table or immutable event history is not visible in this repository and should be added if formal audit requirements apply.
 
 ## Part II - Business Intelligence
 
-### Data Integration and ETL
+,,,
 
-The documented target flow is designed to transform source placement files into a queryable Data Warehouse:
-
-1. Excel files are supplied as source data.
-2. SSIS packages, when configured in the deployment environment, extract and validate the files.
-3. Data is loaded into an Operational Data Store (ODS).
-4. Cleaning and transformation standardize dates, amounts, currencies, structures, maturity and objectives.
-5. Quality checks identify missing values, invalid formats, duplicates and inconsistent business attributes.
-6. Validated data is loaded into the Data Warehouse.
-7. SQL Server Agent can schedule the packages when job configuration is available.
-
-No `.dtsx` package, ODS schema, SQL Agent job or ETL deployment script is present in this repository. The steps above describe the BI architecture and must be aligned with the actual SSIS environment before production use.
-
-```mermaid
-flowchart LR
-    XLS[Excel source files] --> SSIS[SSIS extraction and transformation\nwhen configured]
-    SSIS --> ODS[(ODS\noperational staging)]
-    ODS --> QC[Cleaning, validation\nand quality checks]
-    QC --> DW[(SQL Server\nData Warehouse)]
-    DW --> PBI[Power BI dashboards]
-    DW --> CHAT[Scoped chatbot queries]
-    AGENT[SQL Server Agent\noptional scheduling] --> SSIS
-```
-
-### Data Quality Responsibilities
-
-An operational ETL implementation should define rejection and remediation rules for:
-
-- Missing or malformed subscription and maturity dates.
-- Invalid amounts, rates, currencies or durations.
-- Duplicate placement records.
-- Unknown agencies, regional directions, products or maturity bands.
-- Missing objectives or incompatible objective currency.
-- Partial file loads and failed database transactions.
-
-The Python forecasting pipeline contains its own input normalization and validation for CSV and Excel files, but that logic is not a replacement for an enterprise ETL quality process.
-
-### Data Warehouse Model
-
-The repository documents the following Data Warehouse structures:
-
-| Table | Role |
-| --- | --- |
-| `DW.FAIT_PLACEMENT` | Main fact table; one row represents a financial placement according to the chatbot schema |
-| `DW.FAIT_OBJECTIF` | Commercial or investment objectives by structure and year |
-| `DW.DIM_TEMPS` | Calendar and date attributes, including subscription and maturity dates |
-| `DW.DIM_STRUCTURE` | Agency and regional-direction attributes |
-| `DW.DIM_MATURITE` | Contractual and residual maturity bands |
-| `DW.DIM_PRODUIT` | Financial product attributes used by the chatbot schema |
-| `DW.DIM_DEVISE` | Currency attributes used by the chatbot schema |
-| `DW.DIM_ACTIVITE` | Economic activity attributes used by the chatbot schema |
-
-The model follows a dimensional approach: facts hold measurable events and amounts, while dimensions provide the analytical axes. The exact physical keys and all relationships must be confirmed against the deployed SQL Server schema. The chatbot code explicitly references structure and time joins, including separate time aliases for subscription and maturity dates.
-
-Relevant measures and attributes include placement amounts, interest rates, interest charges, effective duration, subscription dates, maturity dates, structures, currencies, contractual maturity, residual maturity and placement objectives. The implementation stores amounts in millimes in the documented fact schema and converts them for some chatbot displays; reporting conventions should be standardized in the BI layer.
-
-### Power BI
-
-The React dashboard embeds a configured Power BI report URL and provides a full-screen link. The code describes the report as a consolidated placement KPI view. The following analytical views are appropriate to the documented model and are part of the intended BI scope:
-
-- Placement amounts by agency, regional direction and structure.
-- Actual performance compared with objectives.
-- Objective achievement rate.
-- Dinar versus foreign-currency analysis.
-- Subscription dates, maturity dates and residual maturity.
-- Interest rates, interest charges and placement duration.
-- KPI cards, filters and interactive slicers.
-- BNA-inspired visual identity.
-
-The repository does not contain the Power BI `.pbix` file or DAX source. Therefore, the exact measures, refresh policy, workspace permissions and visuals must be documented from the deployed Power BI artifact rather than inferred here.
-
-The business value of this layer is a more consistent performance view, less manual consolidation, faster monitoring and better support for operational and strategic decisions.
 
 ## Part III - AI Chatbot and Machine Learning
 
@@ -298,8 +221,7 @@ The forecasting component is confirmed as implemented. The frontend uploads `.cs
 | Random Forest | `RandomForestRegressor` with lag/feature-based forecasting helpers |
 | XGBoost | `XGBRegressor` with lag/feature-based forecasting helpers |
 
-The implemented metrics are RMSE and SMAPE. The repository contains the evaluation code but does not provide a universal accuracy score: scores depend on the uploaded dataset, period, preprocessing result and run. No dataset or benchmark result is bundled in this repository.
-
+The implemented metrics are RMSE and SMAPE. 
 #### Integration Opportunities
 
 The current forecast outputs are exposed through the platform's forecast page. Future work can publish validated forecasts to Power BI, persist model versions and training metadata in SQL Server, schedule retraining, add confidence intervals and monitor drift. These are evolution paths, not claims about current implementation.
@@ -373,7 +295,7 @@ The separate SSIS-to-ODS-to-Data-Warehouse flow is described in [Data Integratio
 - Uploads are restricted to CSV/Excel extensions and 15 MB by the forecast route.
 - Secrets and database credentials belong in environment variables.
 
-The frontend stores the JWT in `localStorage` in the current implementation. A production security review should assess the associated XSS risk, Content Security Policy, cookie strategy, HTTPS enforcement, secret rotation, rate limiting and audit requirements.
+
 
 ## Installation and Configuration
 
@@ -394,7 +316,7 @@ cd ..\ml-forecast
 python -m pip install -r requirements.txt
 ```
 
-Before starting the application, configure SQL Server databases, a database user, JWT settings and any optional integrations. The repository does not include database creation scripts or sample credentials.
+Before starting the application, configure SQL Server databases, a database user, JWT settings and any optional integrations. 
 
 ## Environment Variables
 
@@ -425,7 +347,7 @@ The following names are read by the current code. Values are deployment-specific
 | `FRONTEND_LOGIN_URL` | Optional explicit login URL in emails | Welcome credential email |
 | `NODE_ENV` | Controls development-only chatbot debug SQL response | Runtime behavior |
 
-The frontend currently defines its API base URL and Power BI embed URL in `frontend/src/config.js`. They are source configuration values rather than documented secrets; deployments should externalize them when environment-specific configuration is required.
+
 
 ## Running the Application
 
@@ -443,9 +365,7 @@ cd frontend
 npm start
 ```
 
-The backend code is configured for the local frontend origins `http://localhost:3000` and `http://127.0.0.1:3000`. The API base URL currently used by the frontend is `http://localhost:5000/api`; ensure that `PORT` and the frontend configuration agree in the target environment.
 
-The backend also exposes `GET /api/health` for a basic API availability check. Forecast execution additionally requires a working Python executable and all packages in `ml-forecast/requirements.txt`.
 
 ## Project Structure
 <p align="center">
@@ -459,8 +379,6 @@ The backend also exposes `GET /api/health` for a basic API availability check. F
 
 ## Testing and Validation
 
-No automated test suite or test command is defined in the checked-in `package.json` files. The following validation activities are available from the implementation:
-
 - Check backend availability with `GET /api/health`.
 - Verify login, JWT rejection and inactive-account behavior against a non-production database.
 - Verify first-login route protection and successful password change.
@@ -469,7 +387,7 @@ No automated test suite or test command is defined in the checked-in `package.js
 - Verify forecast upload validation, training status, generated summary and model comparison outputs.
 - Run `npm run build` from `frontend` before a frontend deployment.
 
-Power BI refresh, SSIS data quality checks, SQL Server permissions and SQL Agent scheduling require validation in their respective environments because those artifacts are not stored here.
+
 
 ## Current Limitations
 
@@ -493,7 +411,7 @@ Power BI refresh, SSIS data quality checks, SQL Server permissions and SQL Agent
 This project was developed as a final-year academic project. Add the verified contributor names, affiliations and contact details before publishing:
 
 | Contributor | Role | 
-| --- | --- | --- |
+| --- | --- | 
 | `Bejaoui Achref` | Project development | 
 | `Haji Amel` | Academic supervision | 
 
