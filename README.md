@@ -229,6 +229,9 @@ The repository documents the following Data Warehouse structures:
 The model follows a dimensional approach: facts hold measurable events and amounts, while dimensions provide the analytical axes. The exact physical keys and all relationships must be confirmed against the deployed SQL Server schema. The chatbot code explicitly references structure and time joins, including separate time aliases for subscription and maturity dates.
 
 Relevant measures and attributes include placement amounts, interest rates, interest charges, effective duration, subscription dates, maturity dates, structures, currencies, contractual maturity, residual maturity and placement objectives. The implementation stores amounts in millimes in the documented fact schema and converts them for some chatbot displays; reporting conventions should be standardized in the BI layer.
+You can find the SSIS packages:
+
+[**BNA Data Warehouse Repository**](https://github.com/Achref-004/PFE_DW_BNA)
 
 ### Power BI
 
