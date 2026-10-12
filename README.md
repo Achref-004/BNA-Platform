@@ -540,5 +540,6 @@ This project was developed as a final-year academic project. Add the verified co
 | `[Supervisor name]` | Academic supervision | `[Contact or profile]` |
 
 ## License
+This project is distributed under the ISC License.
 
-No repository-level `LICENSE` file is currently present. The backend package metadata declares `ISC`, but that package metadata alone does not establish a license for the complete repository. Add an approved license file and replace this section with its exact terms before public distribution.
+See [`LICENSE`](LICENSE).
