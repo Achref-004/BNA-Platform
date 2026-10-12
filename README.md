@@ -432,6 +432,6 @@ Areas of interest:
 - Power BI
 - Backend Engineering
 - Data Engineering
-
-[LinkedIn](www.linkedin.com/in/achref-bejaoui00) ·
+  
+[LinkedIn](https://linkedin.com/in/achref-bejaoui00) ·
 [GitHub](https://github.com/Achref-004)
