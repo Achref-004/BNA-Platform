@@ -242,9 +242,45 @@ The React dashboard embeds a configured Power BI report URL and provides a full-
 - Interest rates, interest charges and placement duration.
 - KPI cards, filters and interactive slicers.
 - BNA-inspired visual identity.
+#### Tableau de bord «Vue Générale »
+<p align="center">
+  <img
+    src="frontend/public/dash1.jpeg"
+    alt="dash1"
+  >
+</p>
 
+#### Tableau de bord «Objectifs »
+<p align="center">
+  <img
+    src="frontend/public/dash2.jpeg"
+    alt="dash2"
+  >
+</p>
 
+#### Tableau de bord «Maturité »
+<p align="center">
+  <img
+    src="frontend/public/dash3.jpeg"
+    alt="dash3"
+  >
+</p>
 
+#### Tableau de bord «Produit et Activité »
+<p align="center">
+  <img
+    src="frontend/public/dash4.jpeg"
+    alt="dash4"
+  >
+</p>
+
+#### Tableau de bord «Coûts »
+<p align="center">
+  <img
+    src="frontend/public/dash5.jpeg"
+    alt="dash5"
+  >
+</p>
 The business value of this layer is a more consistent performance view, less manual consolidation, faster monitoring and better support for operational and strategic decisions.
 
 ## Part III - AI Chatbot and Machine Learning
