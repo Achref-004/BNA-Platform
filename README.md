@@ -541,5 +541,5 @@ This project was developed as a final-year academic project. Add the verified co
 
 ## License
 This project is distributed under the ISC License.
-
+See [`LICENSE`](LICENCE)
 
