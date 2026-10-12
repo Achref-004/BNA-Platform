@@ -186,7 +186,7 @@ The documented target flow is designed to transform source placement files into 
 6. Validated data is loaded into the Data Warehouse.
 7. SQL Server Agent can schedule the packages when job configuration is available.
 
-No `.dtsx` package, ODS schema, SQL Agent job or ETL deployment script is present in this repository. The steps above describe the BI architecture and must be aligned with the actual SSIS environment before production use.
+The steps above describe the BI architecture :
 
 ```mermaid
 flowchart LR
@@ -210,7 +210,6 @@ An operational ETL implementation should define rejection and remediation rules 
 - Missing objectives or incompatible objective currency.
 - Partial file loads and failed database transactions.
 
-The Python forecasting pipeline contains its own input normalization and validation for CSV and Excel files, but that logic is not a replacement for an enterprise ETL quality process.
 
 ### Data Warehouse Model
 
@@ -233,7 +232,7 @@ Relevant measures and attributes include placement amounts, interest rates, inte
 
 ### Power BI
 
-The React dashboard embeds a configured Power BI report URL and provides a full-screen link. The code describes the report as a consolidated placement KPI view. The following analytical views are appropriate to the documented model and are part of the intended BI scope:
+The React dashboard embeds a configured Power BI report URL and provides a full-screen link. The following analytical views are appropriate to the documented model and are part of the intended BI scope:
 
 - Placement amounts by agency, regional direction and structure.
 - Actual performance compared with objectives.
@@ -244,7 +243,7 @@ The React dashboard embeds a configured Power BI report URL and provides a full-
 - KPI cards, filters and interactive slicers.
 - BNA-inspired visual identity.
 
-The repository does not contain the Power BI `.pbix` file or DAX source. Therefore, the exact measures, refresh policy, workspace permissions and visuals must be documented from the deployed Power BI artifact rather than inferred here.
+
 
 The business value of this layer is a more consistent performance view, less manual consolidation, faster monitoring and better support for operational and strategic decisions.
 
