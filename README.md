@@ -173,6 +173,12 @@ The frontend locally checks the token expiration to avoid sending an obviously e
 
 
 ## Part II - Business Intelligence
+<p align="center">
+  <img
+    src="frontend/public/WhatsApp Image 2026-10-13 at 12.28.33 AM.jpeg"
+    alt="BNA Platform logo"
+  >
+</p>
 
 ### Data Integration and ETL
 
@@ -214,6 +220,12 @@ An operational ETL implementation should define rejection and remediation rules 
 ### Data Warehouse Model
 
 The repository documents the following Data Warehouse structures:
+<p align="center">
+  <img
+    src="frontend/public/WhatsApp Image 2026-10-13 at 12.28.33 AM (1).jpeg"
+    alt="BNA Platform logo"
+  >
+</p>
 
 | Table | Role |
 | --- | --- |
